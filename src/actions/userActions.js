@@ -71,7 +71,6 @@ export const logout = async (dispatch) => {
 export const forgotPassword = async (dispatch,formData) => {
   try {
     const email = formData.get('email');
-    console.log(email);
     dispatch({ type: 'FORGOT_PASSWORD_REQUEST' })
 
     const config = {
@@ -94,3 +93,30 @@ export const forgotPassword = async (dispatch,formData) => {
     })
 }
 };
+
+export const resetPassword=async (dispatch,token,passwords) => {
+  try {
+
+      dispatch({ type: 'NEW_PASSWORD_REQUEST' })
+
+      const config = {
+          headers: {
+              'Content-Type': 'application/json'
+          }
+      }
+
+      const { data } = await axios.put(`/password/reset/${token}`, passwords, config)
+      console.log("data: ",data);
+      dispatch({
+          type: 'NEW_PASSWORD_SUCCESS',
+          payload: data.success
+      })
+
+  } catch (error) {
+      dispatch({
+          type: 'NEW_PASSWORD_FAIL',
+          payload: error.response.data.message
+      })
+  }
+}
+

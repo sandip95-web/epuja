@@ -87,18 +87,17 @@ userRouter.post("/user/logout", async (req, res) => {
 
 //forgot password
 userRouter.post("/password/forget", async (req, res) => {
-  console.log(req.body.email);
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found" });
   }
   // get reset token
   const resetToken = user.getResetPasswordToken();
+  user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+  user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // Token expires in 10 minutes
   await user.save({ validateBeforeSave: false });
   //create reset password url
-  const resetUrl = `${req.protocol}://${req.get(
-    "host"
-  )}/password/reset/${resetToken}`;
+  const resetUrl = `http://localhost:5173/password/reset/${resetToken}`;
   const message = `Your password reset token is as follow:\n\n${resetUrl}\n\n If you have not requested it then ignore it please.`;
 
   try {
@@ -124,16 +123,19 @@ userRouter.put("/password/reset/:token", async (req, res) => {
     .createHash("sha256")
     .update(req.params.token)
     .digest("hex");
+    
   const user = await User.findOne({
     resetPasswordToken,
     resetPasswordExpire: { $gt: Date.now() },
   });
+  console.log(user);
   if (!user) {
     return res.status(400).json({
       success: false,
       message: "Password reset token is invalid or has been expired",
     });
   }
+  console.log(req.body.password);
   if (req.body.password !== req.body.confirmPassword) {
     return res
       .status(400)

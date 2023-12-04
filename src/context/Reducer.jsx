@@ -86,6 +86,7 @@ export const productReducer = (state, action) => {
         isError: action.payload,
       };
     case "FORGOT_PASSWORD_REQUEST":
+    case "NEW_PASSWORD_REQUEST":
       return {
         ...state,
         isLoading: true,
@@ -97,10 +98,17 @@ export const productReducer = (state, action) => {
         isLoading: false,
         message: action.payload,
       };
-    case " FORGOT_PASSWORD_FAIL":
+    case 'NEW_PASSWORD_SUCCESS':
       return {
         ...state,
-        loading: false,
+        success: true,
+        isLoading:false
+      };
+    case " FORGOT_PASSWORD_FAIL":
+    case 'NEW_PASSWORD_FAIL':
+      return {
+        ...state,
+        isLoading: false,
         isError: action.payload,
       };
 

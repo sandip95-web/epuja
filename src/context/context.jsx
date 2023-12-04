@@ -2,8 +2,8 @@ import { useReducer } from "react";
 import { createContext } from "react";
 import { productReducer } from "./Reducer";
 import { useContext } from "react";
-import { getProduct, getProductDetail,clearErrors } from "../actions/productActions";
-import {login,getUserDetail,logout,forgotPassword} from '../actions/userActions';
+import { getProduct, getProductDetail,} from "../actions/productActions";
+import {login,getUserDetail,logout,forgotPassword,resetPassword} from '../actions/userActions';
 const AppContext = createContext();
 const initalState = {
   isLoading: false,
@@ -16,7 +16,8 @@ const initalState = {
   isAuthenticated:false,
   user:{},
   isSuccess:false,
-  message:""
+  message:"",
+  success:false
 };
 
 const AppProvider = ({ children }) => {
@@ -24,7 +25,7 @@ const AppProvider = ({ children }) => {
 
   return (
     <AppContext.Provider
-      value={{ ...state, dispatch, getProduct, getProductDetail,login,getUserDetail,logout,forgotPassword}}
+      value={{ ...state, dispatch, getProduct, getProductDetail,login,getUserDetail,logout,forgotPassword,resetPassword}}
     >
       {children}
     </AppContext.Provider>

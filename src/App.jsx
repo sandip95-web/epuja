@@ -9,6 +9,7 @@ import Search from "./components/Search";
 import { ToastContainer } from "react-toastify";
 import Login from "./components/user/Login";
 import ForgotPassword from "./components/user/ForgotPassword";
+import NewPassword from "./components/user/NewPassword";
 
 
 axios.defaults.baseURL = "http://localhost:4000";
@@ -26,6 +27,7 @@ function App() {
           <Route path="/product/:id" element={<ProductDetail />} exact />
           <Route path="/login" element={<Login />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
+          <Route path="/password/reset/:token" element={<NewPassword/>} />
         </Routes>
         <Footer />
         <ToastContainer position="top-center" autoClose={3000} />
