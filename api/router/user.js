@@ -5,12 +5,20 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const sendEmail = require("../utils/sendEmail");
 const crypto = require("crypto");
-const { log } = require("console");
 const { authMiddleware, authorizeRole } = require("../middleware/auth");
+const cloudinary  =  require('cloudinary');
+const multer = require('multer');
 
+const upload = multer();
 //to add the new user
-userRouter.post("/user/register", async (req, res) => {
+userRouter.post("/user/register", upload.single('avatar'),async (req, res) => {
   try {
+    const result = await cloudinary.v2.uploader.upload(req.body.avatar, {
+      folder: 'avatars',
+      width: 150,
+      crop: "scale"
+  })
+  console.log(result);
     const { name, email, password } = req.body;
     const findUser = await User.findOne({ email });
     if (findUser) {
@@ -23,13 +31,14 @@ userRouter.post("/user/register", async (req, res) => {
       email,
       password: bcrypt.hashSync(password, 10),
       avatar: {
-        public_id: "avatars/1",
-        url: "https://imgs.search.brave.com/g9omP8tjGucULi-5aOeXsUK_-aCHcXLC4KrXs0pXUf0/rs:fit:860:0:0/g:ce/aHR0cDovL20uZ2V0/dHl3YWxscGFwZXJz/LmNvbS93cC1jb250/ZW50L3VwbG9hZHMv/MjAyMy8wNi9Ba2Fn/YW1pLVNoYW5rcy1Q/cm9maWxlLUltYWdl/LmpwZw",
+        public_id: result.public_id,
+        url: result.secure_url,
       },
     });
     return res.status(200).json({ success: true, user });
   } catch (error) {
     console.log("Error: ", error.message);
+    res.status(500).json("Internal Error")
   }
 });
 

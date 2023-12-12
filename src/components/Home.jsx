@@ -7,6 +7,7 @@ import Pagination from "react-js-pagination";
 import { useParams } from "react-router";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import Search from "./Search";
+import { logout } from "../actions/userActions";
 
 const Home = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -34,6 +35,7 @@ const Home = () => {
     let id = localStorage.getItem("id");
     if(!token){
       id=""
+      logout(dispatch);
     }
     if (token && id) {
     getUserDetail(dispatch,id,token);

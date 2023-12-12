@@ -2,20 +2,22 @@ import React, { useState } from "react";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { AiOutlineSearch } from "react-icons/ai";
 import logo from "../assets/logo.svg";
-import { Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useGlobalContext } from "../context/context";
 
 const Header = () => {
   const [active, setActive] = useState("home");
-  const { user, isSuccess,dispatch,logout,isLoading} = useGlobalContext();
-
-  const handleLogout=()=>{
+  const { dispatch, logout, isLoading } = useGlobalContext();
+  const storedUser = localStorage.getItem("user");
+  const user = JSON.parse(storedUser);
+  const isSuccess = localStorage.getItem("success");
+  const handleLogout = () => {
     try {
-      logout(dispatch)
+      logout(dispatch);
     } catch (error) {
       console.log(error.message);
     }
-  }
+  };
   return (
     <>
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -109,7 +111,7 @@ const Header = () => {
                   >
                     {user && user.role === "admin" && (
                       <li>
-                        <Link className="dropdown-item" to="#">
+                        <Link className="dropdown-item" to="/dashboard">
                           Dashboard
                         </Link>
                       </li>
@@ -122,23 +124,31 @@ const Header = () => {
                     </Link>
                     <Link
                       className="dropdown-item text-danger"
-                      to="/" onClick={handleLogout}
+                      to="/"
+                      onClick={handleLogout}
                     >
                       Logout
                     </Link>
                   </ul>
                 </div>
               ) : (
-                !isLoading && <Link to="/login" className="btn text-white bg-primary">
-                  Login
+                !isLoading && (
+                  <Link to="/login" className="btn text-white bg-primary">
+                    Login
+                  </Link>
+                )
+              )}
+              {user && (
+                <Link
+                  to="/cart"
+                  className="btn bg-none text-white btn-outline-none shadow-none"
+                >
+                  <h6>
+                    <AiOutlineShoppingCart className="fs-3" />
+                    <span className="badge bg-secondary">New</span>
+                  </h6>
                 </Link>
               )}
-              <button className="btn bg-none text-white btn-outline-none shadow-none">
-                <h6>
-                  <AiOutlineShoppingCart className="fs-3" />
-                  <span className="badge bg-secondary">New</span>
-                </h6>
-              </button>
             </div>
           </div>
         </div>

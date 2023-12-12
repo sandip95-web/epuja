@@ -5,10 +5,11 @@ import { useGlobalContext } from "../../context/context";
 import { login } from "../../actions/userActions";
 import { toast } from "react-toastify";
 import Loader from "../Loader";
+import MetaData from "../MetaData";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { dispatch, isAuthenticated, isError, isLoading } = useGlobalContext();
+  const { dispatch, isAuthenticated, isError, isLoading, isSuccess } = useGlobalContext();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -24,6 +25,8 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
+      localStorage.setItem("CheckAuthentication", isAuthenticated);
+      localStorage.setItem("success", isSuccess);
       navigate("/");
       toast.success("Login Successfully");
     } else {
@@ -37,7 +40,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      login(dispatch,formData.email,formData.password);
+      login(dispatch, formData.email, formData.password);
     } catch (error) {
       console.log("Login failed: ", error.message);
     }
@@ -53,6 +56,7 @@ const Login = () => {
 
   return (
     <div className="container mt-5 mb-5">
+      <MetaData title={"Login"} />
       <div className="row justify-content-center">
         <div className="col-md-6">
           <div className="card text-white bg-dark ">
@@ -97,6 +101,14 @@ const Login = () => {
                   className="mt-2 d-block text-center text-danger"
                 >
                   Forgot Password?
+                </Link>
+
+                {/* Add the link to register here */}
+                <Link
+                  to="/register"
+                  className="mt-2 d-block text-center text-success"
+                >
+                  Need an account? Register here
                 </Link>
               </form>
             </div>

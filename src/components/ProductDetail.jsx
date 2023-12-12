@@ -1,16 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useGlobalContext } from "../context/context";
 import Loader from "./Loader";
 import { FaStar, FaPlus, FaMinus, FaShoppingCart } from "react-icons/fa";
 import MetaData from "./MetaData";
-import { toast,ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import { addItemToCart } from "../actions/cartActions";
 
 const ProductDetail = () => {
   const { id } = useParams();
-  const { isLoading, getProductDetail, singleProduct, isError, dispatch } =
+  const [quantity, setQuantity] = useState(1);
+  const { state, getProductDetail, singleProduct, isError, dispatch } =
     useGlobalContext();
+    const storedUser = localStorage.getItem("user");
+    const user = JSON.parse(storedUser);
+  const isInLocalStorage = localStorage.getItem("cartItems")
+    ? JSON.parse(localStorage.getItem("cartItems")).some(
+        (item) => item.product === id
+      )
+    : false;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,13 +36,36 @@ const ProductDetail = () => {
     fetchData();
   }, [dispatch, getProductDetail, isError, alert, id]);
 
+  const addToCart = () => {
+    toast.success("Item Added to Cart");
+    addItemToCart(dispatch, id, quantity, state);
+  };
+
+  const increaseQty = () => {
+    const count = document.querySelector(".count");
+
+    if (count.valueAsNumber >= singleProduct.product.stock) return;
+
+    const qty = count.valueAsNumber + 1;
+    setQuantity(qty);
+  };
+
+  const decreaseQty = () => {
+    const count = document.querySelector(".count");
+
+    if (count.valueAsNumber <= 1) return;
+
+    const qty = count.valueAsNumber - 1;
+    setQuantity(qty);
+  };
+
   if (!singleProduct.product) {
     return <Loader />;
   }
   return (
     <>
-    <MetaData title={singleProduct.product.name} />
-    <ToastContainer position="top-center" />
+      <MetaData title={singleProduct.product.name} />
+      <ToastContainer position="top-center" />
       <div className="container my-5">
         <div className="row">
           {/* Left Column */}
@@ -119,24 +151,51 @@ const ProductDetail = () => {
                 <hr />
 
                 {/* Quantity and Add to Cart in the Same Row with Space */}
-                <div className="d-flex flex-sm-row flex-column align-items-center justify-content-sm-evenly mb-3">
+                <div className="d-flex flex-sm-row flex-column align-items-start justify-content-sm-evenly mb-3">
                   <div className="mr-3">
                     <h5>Quantity:</h5>
                     <div className="d-flex align-items-center">
-                      <button className="btn btn-outline-secondary">
+                      <button
+                        className="btn btn-outline-secondary minus"
+                        onClick={decreaseQty}
+                      >
                         <FaMinus />
                       </button>
-                      <span className="mx-2">1</span>
-                      <button className="btn btn-outline-secondary">
+                      <div className="col-6">
+                        <input
+                          type="number"
+                          className="form-control d-inline count  text-center"
+                          value={quantity}
+                          readOnly
+                        />
+                      </div>
+                      <button
+                        className="btn btn-outline-secondary plus"
+                        onClick={increaseQty}
+                      >
                         <FaPlus />
                       </button>
                     </div>
                   </div>
                   <div>
-                    <button className="btn btn-danger btn-lg my-2">
-                      <FaShoppingCart className="mr-2" />
-                      Add to Cart
-                    </button>
+                    {user ? isInLocalStorage ? (
+                      // If item is in the local storage, show "Remove from Cart" button
+                      <button
+                        className="btn btn-danger btn-lg my-2"
+                        onClick={() => removeFromCart()}
+                      >
+                        Remove from Cart
+                      </button>
+                    ) : (
+                      // If item is not in the local storage, show "Add to Cart" button
+                      <button
+                        className="btn btn-danger btn-lg my-2"
+                        onClick={() => addToCart()}
+                      >
+                        <FaShoppingCart className="mr-2" />
+                        Add to Cart
+                      </button>
+                    ):null}
                   </div>
                 </div>
 

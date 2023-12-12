@@ -2,6 +2,7 @@ const express = require("express");
 const apiRouter = express.Router();
 const Product = require("../models/product");
 const { authMiddleware, authorizeRole } = require("../middleware/auth");
+const cloudinary  =  require('cloudinary');
 const User = require("../models/user");
 //to add new product
 apiRouter.post(
@@ -9,12 +10,37 @@ apiRouter.post(
   authMiddleware,
   authorizeRole("admin"),
   async (req, res) => {
+    console.log(req.body);
     try {
+      let images=[];
+      if(typeof req.body.images === 'string'){
+        images.push(req.body.images);
+      }
+      else{
+        images=req.body.images;
+      }
+      let imagesLink=[];
+      for(let i=0;i<images.length;i++){
+        const result=await cloudinary.uploader.upload(images[i],{
+          folder:'products'
+        }); 
+
+        imagesLink.push({
+          public_id:result.public_id,
+          url:result.url
+        })
+      }
+
+
+      req.body.images=imagesLink
       req.body.user = req.user.id;
 
       const product = await Product.create(req.body);
       res.status(200).json({ success: true, product });
     } catch (error) {
+      console.error('Error uploading image to Cloudinary:', error.message);
+    // Handle the error, e.g., return an error response to the client
+    return res.status(500).json({ success: false, message: 'Image upload failed' })
       console.log("Error: ", error.message);
     }
   }

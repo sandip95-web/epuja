@@ -1,5 +1,33 @@
 import axios from "axios";
 
+
+
+export const register = async (dispatch,userData) => {
+  try {
+
+      dispatch({ type: 'REGISTER_USER_REQUEST' })
+
+      const config = {
+          headers: {
+              'Content-Type': 'multipart/form-data'
+          }
+      }
+      const { data } = await axios.post('/user/register', userData, config)
+      console.log(data);
+      dispatch({
+          type: 'REGISTER_USER_SUCCESS',
+          payload: data.user
+      })
+
+  } catch (error) {
+      dispatch({
+          type: 'REGISTER_USER_FAIL',
+          payload: error.response.data.message
+      })
+  }
+}
+
+
 export const login = async (dispatch, email, password) => {
   try {
     dispatch({ type: "LOGIN_REQUEST" });
@@ -13,14 +41,14 @@ export const login = async (dispatch, email, password) => {
       { email, password },
       config
     );
-    const token = data.token;
+    const user=data.userFind;
     const userId = data.userFind._id;
-    localStorage.setItem("token", token);
     localStorage.setItem("id", userId);
-    console.log(data);
+    localStorage.setItem("user", JSON.stringify(user));
+    
     dispatch({
       type: "LOGIN_SUCCESS",
-      payload: data.user,
+      payload: data.userFind,
     });
   } catch (error) {
     dispatch({
@@ -34,7 +62,6 @@ export const getUserDetail = async (dispatch, id, token) => {
   try {
     if (token) {
       dispatch({ type: "LOGIN_REQUEST" });
-      console.log("id:", id);
       const { data } = await axios.get("/user/info", {
         params: {
           id: id,
